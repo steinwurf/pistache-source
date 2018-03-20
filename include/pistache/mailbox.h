@@ -1,7 +1,7 @@
 /* mailbox.h
    Mathieu Stefani, 12 August 2015
    Copyright (c) 2014 Datacratic.  All rights reserved.
-   
+
    A simple lock-free Mailbox implementation
 */
 
@@ -155,6 +155,10 @@ public:
     struct Entry {
         friend class Queue;
 
+        Entry() :
+            storage()
+        { }
+
         const T& data() const {
             return *reinterpret_cast<const T*>(&storage);
         }
@@ -182,7 +186,12 @@ public:
     }
 
     virtual ~Queue() {
-        while (auto *e = pop()) delete e;
+        while (!empty())
+        {
+            auto *e = pop();
+            delete e;
+        }
+        delete tail;
     }
 
     template<typename U>
@@ -215,7 +224,7 @@ public:
     bool empty() {
         auto *res = tail;
         auto* next = res->next.load(std::memory_order_acquire);
-        return next != nullptr;
+        return next == nullptr;
     }
 
     std::unique_ptr<Entry> popSafe() {

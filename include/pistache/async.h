@@ -235,6 +235,11 @@ namespace Async {
             void *memory() {
                 return &storage;
             }
+
+            virtual ~CoreT() {
+                if (state == State::Fulfilled)
+                    value().~T();
+            }
         };
 
         template<>
