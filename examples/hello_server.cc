@@ -1,11 +1,13 @@
-/* 
+/*
    Mathieu Stefani, 13 février 2016
-   
+
    Example of an hello world server
 */
 
 
 #include "pistache/endpoint.h"
+
+#include <iostream>
 
 using namespace Pistache;
 
@@ -14,7 +16,7 @@ public:
 
     HTTP_PROTOTYPE(HelloHandler)
 
-    void onRequest(const Http::Request& request, Http::ResponseWriter response) {
+    void onRequest(const Http::Request&, Http::ResponseWriter response) {
         response.send(Http::Code::Ok, "Hello World");
     }
 };
@@ -27,7 +29,10 @@ int main() {
     Http::Endpoint server(addr);
     server.init(opts);
     server.setHandler(Http::make_handler<HelloHandler>());
-    server.serve();
+    server.serveThreaded();
+
+    std::cout << "Press Enter to exit" << '\n';
+    std::cin.get();
 
     server.shutdown();
 }
